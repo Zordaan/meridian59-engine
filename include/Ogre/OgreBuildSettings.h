@@ -88,4 +88,12 @@
 
 /* #undef __FLASHCC__ */
 
+#define OGRE_SIMD_TYPES_SSE   1
+#define OGRE_SIMD_TYPES_SSE41 1
+#define OGRE_SIMD_TYPES_AVX   1
+#define OGRE_SIMD_TYPES_AVX2  0
+
+#define OGRE_HAVE_SSE 1
+#define OGRE_HAVE_AVX 1
+
 #endif
