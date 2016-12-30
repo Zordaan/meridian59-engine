@@ -345,9 +345,9 @@ namespace Ogre {
     #    include <pmmintrin.h> // SSE 3
     #    include <smmintrin.h> // SSE 4.1
     #    if OGRE_DOUBLE_PRECISION == 0
-    #       define OGRE_SIMD_SSE_SINGLE 1
+    //#       define OGRE_SIMD_SSE_SINGLE 1
     #    else
-    #      define OGRE_SIMD_SSE_DOUBLE 1
+    //#      define OGRE_SIMD_SSE_DOUBLE 1
     #    endif
     #  endif
     #  if OGRE_SIMD_TYPES_AVX == 1		
@@ -356,10 +356,6 @@ namespace Ogre {
     //#      define OGRE_SIMD_AVX_DOUBLE 1
     #    endif
     #  endif
-    #else
-      //typedef Vector4Base Vector4;
-	  //typedef Vector3Base Vector3;
-      //typedef Vector2Base Vector2;
     #endif
 
     template<typename T> class SharedPtr;

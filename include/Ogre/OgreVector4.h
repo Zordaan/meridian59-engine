@@ -80,102 +80,84 @@ namespace Ogre
 		/** Constructor from four dedicated Real values. 
 		*/
         inline Vector4(const Real fX, const Real fY, const Real fZ, const Real fW)
-      #if OGRE_SIMD_V4_32_SSE2
-        {
-            _mm_store_ps(ptr(), _mm_set_ps(fX, fY, fZ, fW));
-        }
-      #elif OGRE_SIMD_V4_64_AVX
-        {
-            _mm256_store_pd(ptr(), _mm256_set_pd(fX, fY, fZ, fW));
-        }
-      #else
-            : x(fX), y(fY), z(fZ), w(fW)
-        {
-        }
-      #endif
+          #if OGRE_SIMD_V4_32_SSE2
+            : simd(_mm_set_ps(fX, fY, fZ, fW)) { }
+          #elif OGRE_SIMD_V4_64_AVX
+            : simd(_mm256_set_pd(fX, fY, fZ, fW)) { }
+          #else
+            : x(fX), y(fY), z(fZ), w(fW) { }
+          #endif
 
         /** Constructor from Real array.
         */
-        inline explicit Vector4(const Real afCoordinate[4])
-      #if OGRE_SIMD_V4_32_SSE2
-        {
-            _mm_store_ps(ptr(), _mm_loadu_ps(afCoordinate));
-        }
-      #elif OGRE_SIMD_V4_64_AVX
-        {
-			_mm256_store_pd(ptr(), _mm256_loadu_pd(afCoordinate));
-        }
-      #else
-			: x(afCoordinate[0]), y(afCoordinate[1]), z(afCoordinate[2]), w(afCoordinate[3])
-		{
-		}
-      #endif
+		inline explicit Vector4(const Real afCoordinate[4])
+          #if OGRE_SIMD_V4_32_SSE2
+			: simd(_mm_loadu_ps(afCoordinate)) { }
+          #elif OGRE_SIMD_V4_64_AVX
+            : simd(_mm256_loadu_pd(afCoordinate)) { }
+          #else
+			: x(afCoordinate[0]), y(afCoordinate[1]), z(afCoordinate[2]), w(afCoordinate[3]) { }
+          #endif
 
 		/** Constructor from int array.
 		*/
         inline explicit Vector4(const int afCoordinate[4])
-      #if OGRE_SIMD_V4_32_SSE2
-        {
+          #if OGRE_SIMD_V4_32_SSE2
+          {
 			// todo ?
             const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
             const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
-            const __m128  c = _mm_cvtepi32_ps(b);                       // convert ints to floats
-            _mm_store_ps(ptr(), c);
-        }
-      #elif OGRE_SIMD_V4_64_AVX
-        {
+            simd = _mm_cvtepi32_ps(b);                                  // convert ints to floats
+          }
+          #elif OGRE_SIMD_V4_64_AVX
+          {
             const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
             const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
-            const __m256d c = _mm256_cvtepi32_pd(b);                    // convert ints to doubles
-           _mm256_store_pd(ptr(), c);
-		}
-      #else		
+            simd = _mm256_cvtepi32_pd(b);                               // convert ints to doubles
+		  }
+          #else		
             : x((Real)afCoordinate[0]), 
               y((Real)afCoordinate[1]), 
               z((Real)afCoordinate[2]), 
               w((Real)afCoordinate[3])
-        {
-        }
-      #endif
+          {
+          }
+          #endif
 
-		/** Constructor from Real pointer.
-		*/
-		inline explicit Vector4(Real* const r)
-      #if OGRE_SIMD_V4_32_SSE2
-		{
-			_mm_store_ps(ptr(), _mm_loadu_ps(r));
-		}
-      #elif OGRE_SIMD_V4_64_AVX
-        {
-            _mm256_store_pd(ptr(), _mm256_loadu_pd(r));
-        }
-      #else
-			: x(r[0]), y(r[1]), z(r[2]), w(r[3])
-		{
-		}
-      #endif
+        /** Constructor from Real pointer.
+        */
+        inline explicit Vector4(Real* const r)
+          #if OGRE_SIMD_V4_32_SSE2
+            : simd(_mm_loadu_ps(r)) { }
+          #elif OGRE_SIMD_V4_64_AVX
+            : simd(_mm256_loadu_pd(r)) { }
+          #else
+			: x(r[0]), y(r[1]), z(r[2]), w(r[3]) { }
+          #endif
 
-		/** Constructor from single scalar.
-		*/
-		inline explicit Vector4(const Real scalar)
-      #if OGRE_SIMD_V4_32_SSE2
-		{
-			_mm_store_ps(ptr(), _mm_set1_ps(scalar));
-		}
-      #elif OGRE_SIMD_V4_64_AVX
-        {
-            _mm256_store_pd(ptr(), _mm256_set1_pd(scalar));
-        }
-      #else
-			: x(scalar), y(scalar), z(scalar), w(scalar)
-		{
-		}
-      #endif
+        /** Constructor from single scalar.
+        */
+        inline explicit Vector4(const Real scalar)
+          #if OGRE_SIMD_V4_32_SSE2
+            : simd(_mm_set1_ps(scalar)) { }
+          #elif OGRE_SIMD_V4_64_AVX
+            : simd(_mm256_set1_pd(scalar)) { }
+          #else
+			: x(scalar), y(scalar), z(scalar), w(scalar) { }
+          #endif
 
 		inline explicit Vector4(const Vector3& rhs)
 			: x(rhs.x), y(rhs.y), z(rhs.z), w(1.0f)
 		{
 		}
+
+        #if OGRE_SIMD_V4_32_SSE2
+          // SSE Constructor
+          FORCEINLINE Vector4(const __m128 values) : simd(values) { }
+        #elif OGRE_SIMD_V4_64_AVX
+          // AVX Constructor
+          FORCEINLINE Vector4(const __m256d values) : simd(values) { }
+        #endif
 
 		/** Swizzle-like narrowing operations
 		*/
@@ -188,20 +170,6 @@ namespace Ogre
 			return Vector2(x, y);
 		}
 
-      #if OGRE_SIMD_V4_32_SSE2
-        // SSE Constructor
-        FORCEINLINE Vector4(const __m128 values)
-        {
-          _mm_store_ps(ptr(), values);
-        }
-      #elif OGRE_SIMD_V4_64_AVX
-        // AVX Constructor
-        FORCEINLINE Vector4(const __m256d values)
-        {
-           _mm256_store_pd(ptr(), values);
-		}
-      #endif
-
 		/** Exchange the contents of this vector with another.
 		*/
 		inline void swap(Vector4& other)
@@ -212,10 +180,10 @@ namespace Ogre
 			_mm_store_ps(ptr(), b);                     // save b to this
 			_mm_store_ps(other.ptr(), a);               // save a to other
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());        // load a from this
-            const __m256d b = _mm256_load_pd(other.ptr());  // load b from other
-            _mm256_store_pd(ptr(), b);                      // save b to this
-            _mm256_store_pd(other.ptr(), a);                // save a to other
+            const __m256d a = simd;        // load a from this
+            const __m256d b = other.simd;  // load b from other
+			simd = b;                      // save b to this
+			other.simd = a;                // save a to other
           #else
 			std::swap(x, other.x);
 			std::swap(y, other.y);
@@ -258,7 +226,7 @@ namespace Ogre
           #if OGRE_SIMD_V4_32_SSE2
             _mm_store_ps(ptr(), _mm_load_ps(rkVector.ptr()));
           #elif OGRE_SIMD_V4_64_AVX
-            _mm256_store_pd(ptr(), _mm256_load_pd(rkVector.ptr()));
+			simd = rkVector.simd;
           #else
             x = rkVector.x;
             y = rkVector.y;
@@ -273,7 +241,7 @@ namespace Ogre
           #if OGRE_SIMD_V4_32_SSE2
             _mm_store_ps(ptr(), _mm_set1_ps(fScalar));
           #elif OGRE_SIMD_V4_64_AVX
-            _mm256_store_pd(ptr(), _mm256_set1_pd(fScalar));
+            simd = _mm256_set1_pd(fScalar);
           #else
             x = fScalar;
             y = fScalar;
@@ -294,8 +262,8 @@ namespace Ogre
             const bool    f = e == 0xFFFF;                 // check all equal
             return f;
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());           // load this
-            const __m256d b = _mm256_load_pd(rkVector.ptr());  // load other
+            const __m256d a = simd;                            // load this
+            const __m256d b = rkVector.simd;                   // load other
             const __m256d c = _mm256_cmp_pd(a, b, _CMP_EQ_OQ); // compare all components			
             const __m256i d = _mm256_castpd_si256(c);          // cast from double to int64 (no-op)
             const int     e = _mm256_movemask_epi8(d);         // combine some bits from all registers
@@ -320,8 +288,8 @@ namespace Ogre
             const bool    f = e != 0xFFFF;                 // check not all equal
             return f;
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());           // load this
-            const __m256d b = _mm256_load_pd(rkVector.ptr());  // load other
+            const __m256d a = simd;                            // load this
+            const __m256d b = rkVector.simd;                   // load other
             const __m256d c = _mm256_cmp_pd(a, b, _CMP_EQ_OQ); // compare all components			
             const __m256i d = _mm256_castpd_si256(c);          // cast from double to int64 (no-op)
             const int     e = _mm256_movemask_epi8(d);         // combine some bits from all registers
@@ -353,10 +321,7 @@ namespace Ogre
             const __m128 c = _mm_add_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_add_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_add_pd(simd, rkVector.simd));
           #else
             return Vector4(
                 x + rkVector.x,
@@ -374,10 +339,7 @@ namespace Ogre
             const __m128 c = _mm_sub_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_sub_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_sub_pd(simd, rkVector.simd));
           #else
             return Vector4(
                 x - rkVector.x,
@@ -395,10 +357,7 @@ namespace Ogre
             const __m128 c = _mm_mul_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_set1_pd(fScalar);
-            const __m256d c = _mm256_mul_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_mul_pd(simd, _mm256_set1_pd(fScalar)));
 		  #else
             return Vector4(
                 x * fScalar,
@@ -416,10 +375,7 @@ namespace Ogre
             const __m128 c = _mm_mul_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rhs.ptr());
-            const __m256d c = _mm256_mul_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_mul_pd(simd, rhs.simd));
 		  #else
             return Vector4(
                 rhs.x * x,
@@ -439,10 +395,7 @@ namespace Ogre
             const __m128 c = _mm_div_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_set1_pd(fScalar);
-            const __m256d c = _mm256_div_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_div_pd(simd, _mm256_set1_pd(fScalar)));
           #else
             Real fInv = 1.0f / fScalar;
 
@@ -462,10 +415,7 @@ namespace Ogre
             const __m128 c = _mm_div_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rhs.ptr());
-            const __m256d c = _mm256_div_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_div_pd(simd, rhs.simd));
           #else
             return Vector4(
                 x / rhs.x,
@@ -487,7 +437,7 @@ namespace Ogre
             const __m128 b = _mm_xor_ps(a, SIGNMASK_SSE); // flip sign bit
             return Vector4(b);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());          // load values
+            const __m256d a = simd;                           // load values
             const __m256d b = _mm256_xor_pd(a, SIGNMASK_AVX); // flip sign bit
             return Vector4(b);
           #else
@@ -503,10 +453,7 @@ namespace Ogre
             const __m128 c = _mm_mul_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_set1_pd(fScalar);
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_mul_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_mul_pd(_mm256_set1_pd(fScalar), rkVector.simd));
           #else
             return Vector4(
                 fScalar * rkVector.x,
@@ -524,10 +471,7 @@ namespace Ogre
             const __m128 c = _mm_div_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_set1_pd(fScalar);
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_div_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_div_pd(_mm256_set1_pd(fScalar), rkVector.simd));
           #else
             return Vector4(
                 fScalar / rkVector.x,
@@ -545,10 +489,7 @@ namespace Ogre
             const __m128 c = _mm_add_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(lhs.ptr());
-            const __m256d b = _mm256_set1_pd(rhs);
-            const __m256d c = _mm256_add_pd(a, b);
-            return Vector4(c);
+			return Vector4(_mm256_add_pd(lhs.simd, _mm256_set1_pd(rhs)));
           #else
             return Vector4(
                 lhs.x + rhs,
@@ -566,10 +507,7 @@ namespace Ogre
             const __m128 c = _mm_add_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_set1_pd(lhs);
-            const __m256d b = _mm256_load_pd(rhs.ptr());
-            const __m256d c = _mm256_add_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_add_pd(_mm256_set1_pd(lhs), rhs.simd));
           #else
             return Vector4(
                 lhs + rhs.x,
@@ -587,10 +525,7 @@ namespace Ogre
             const __m128 c = _mm_sub_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(lhs.ptr());
-            const __m256d b = _mm256_set1_pd(rhs);
-            const __m256d c = _mm256_sub_pd(a, b);
-            return Vector4(c);
+            return Vector4(_mm256_sub_pd(lhs.simd, _mm256_set1_pd(rhs)));
           #else
             return Vector4(
                 lhs.x - rhs,
@@ -608,10 +543,7 @@ namespace Ogre
             const __m128 c = _mm_sub_ps(a, b);
             return Vector4(c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_set1_pd(lhs);
-            const __m256d b = _mm256_load_pd(rhs.ptr());
-            const __m256d c = _mm256_sub_pd(a, b);
-            return Vector4(c);
+			return Vector4(_mm256_sub_pd(_mm256_set1_pd(lhs), rhs.simd));
           #else
             return Vector4(
                 lhs - rhs.x,
@@ -630,10 +562,7 @@ namespace Ogre
             const __m128 c = _mm_add_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_add_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_add_pd(simd, rkVector.simd);
           #else
             x += rkVector.x;
             y += rkVector.y;
@@ -651,10 +580,7 @@ namespace Ogre
             const __m128 c = _mm_sub_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_sub_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_sub_pd(simd, rkVector.simd);
           #else
             x -= rkVector.x;
             y -= rkVector.y;
@@ -672,10 +598,7 @@ namespace Ogre
             const __m128 c = _mm_mul_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_set1_pd(fScalar);
-            const __m256d c = _mm256_mul_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_mul_pd(simd, _mm256_set1_pd(fScalar));
           #else
             x *= fScalar;
             y *= fScalar;
@@ -693,10 +616,7 @@ namespace Ogre
             const __m128 c = _mm_add_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_set1_pd(fScalar);
-            const __m256d c = _mm256_add_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_add_pd(simd, _mm256_set1_pd(fScalar));
           #else
             x += fScalar;
             y += fScalar;
@@ -714,10 +634,7 @@ namespace Ogre
             const __m128 c = _mm_sub_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_set1_pd(fScalar);
-            const __m256d c = _mm256_sub_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_sub_pd(simd, _mm256_set1_pd(fScalar));
           #else
             x -= fScalar;
             y -= fScalar;
@@ -735,10 +652,7 @@ namespace Ogre
             const __m128 c = _mm_mul_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_mul_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_mul_pd(simd, rkVector.simd);
           #else
             x *= rkVector.x;
             y *= rkVector.y;
@@ -758,10 +672,7 @@ namespace Ogre
             const __m128 c = _mm_div_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_set1_pd(fScalar);
-            const __m256d c = _mm256_div_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_div_pd(simd, _mm256_set1_pd(fScalar));
           #else
             const Real fInv = 1.0f / fScalar; // TODO ?
             x *= fInv;
@@ -780,10 +691,7 @@ namespace Ogre
             const __m128 c = _mm_div_ps(a, b);
             _mm_store_ps(ptr(), c);
           #elif OGRE_SIMD_V4_64_AVX
-            const __m256d a = _mm256_load_pd(ptr());
-            const __m256d b = _mm256_load_pd(rkVector.ptr());
-            const __m256d c = _mm256_div_pd(a, b);
-            _mm256_store_pd(ptr(), c);
+            simd = _mm256_div_pd(simd, rkVector.simd);
           #else
             x /= rkVector.x;
             y /= rkVector.y;
