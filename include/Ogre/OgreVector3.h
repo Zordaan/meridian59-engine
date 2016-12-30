@@ -821,6 +821,7 @@ namespace Ogre
             return o;
         }
     };
+
     /** @} */
     /** @} */
 

@@ -30,11 +30,11 @@ THE SOFTWARE.
 
 namespace Ogre
 {
-    const Vector4Base Vector4Base::ZERO( 0, 0, 0, 0 );
+    const Vector4 Vector4::ZERO( 0, 0, 0, 0 );
 
-/*#if OGRE_SIMD_SSE_SINGLE
-	const Vector4SSE32 Vector4SSE32::ZERO(0, 0, 0, 0);
-#elif OGRE_SIMD_AVX_DOUBLE
-	const Vector4AVX64 Vector4SSE32::ZERO(0, 0, 0, 0);
-#endif*/
+#if OGRE_SIMD_V4_32_SSE2
+	const __m128 Vector4::SIGNMASK_SSE = _mm_castsi128_ps(_mm_set1_epi32(0x80000000));
+#elif OGRE_SIMD_V4_64_AVX == 1
+	const __m256d Vector4::SIGNMASK_AVX = _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000));
+#endif
 }

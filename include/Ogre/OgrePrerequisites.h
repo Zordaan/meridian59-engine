@@ -69,36 +69,7 @@ namespace Ogre {
         */
         typedef float Real;
     #endif
-		
-		// settings for SIMD instructions
-#if OGRE_SIMD_TYPES_SSE == 1 || OGRE_SIMD_TYPES_AVX == 1
-#define ALIGN16 __declspec(intrin_type) __declspec(align(16))
-#define ALIGN32 __declspec(intrin_type) __declspec(align(32))
-#if OGRE_SIMD_TYPES_SSE == 1		
-#include <xmmintrin.h> // SSE
-#include <emmintrin.h> // SSE 2
-#include <pmmintrin.h> // SSE 3
-#include <smmintrin.h> // SSE 4.1
-#if OGRE_DOUBLE_PRECISION == 0
-#define OGRE_SIMD_SSE_SINGLE 1
-#define ALIGNMENT ALIGN16
-		class Vector4SSE32;
-#endif
-#endif
-#if OGRE_SIMD_TYPES_AVX == 1		
-#include <immintrin.h> // AVX
-#if OGRE_DOUBLE_PRECISION == 1
-#define OGRE_SIMD_AVX_DOUBLE 1
-#define ALIGNMENT ALIGN32
-		class Vector4AVX64;
-#endif
-#endif 
-#endif
-#ifndef ALIGNMENT
-#define ALIGN16
-#define ALIGN32
-#define ALIGNMENT	
-#endif
+
 
     #if OGRE_COMPILER == OGRE_COMPILER_GNUC && OGRE_COMP_VER >= 310 && !defined(STLPORT)
     #   if OGRE_COMP_VER >= 430
@@ -344,7 +315,7 @@ namespace Ogre {
     class UserObjectBindings;
     class Vector2;
     class Vector3;
-    class Vector4Base;
+    class Vector4;
     class Viewport;
     class VertexAnimationTrack;
     class VertexBufferBinding;
@@ -363,13 +334,33 @@ namespace Ogre {
     class CompositionTargetPass;
     class CustomCompositionPass;
 	
-#if OGRE_SIMD_SSE_SINGLE
-	typedef Vector4SSE32 Vector4;
-#elif OGRE_SIMD_AVX_DOUBLE
-	typedef Vector4AVX64 Vector4;
-#else
-	typedef Vector4Base Vector4;
-#endif
+	// settings for SIMD instructions
+    #if OGRE_SIMD_TYPES_SSE == 1 || OGRE_SIMD_TYPES_AVX == 1
+    #  define ALIGN8                          __declspec(align(8))
+    #  define ALIGN16 __declspec(intrin_type) __declspec(align(16))
+    #  define ALIGN32 __declspec(intrin_type) __declspec(align(32))
+    #  if OGRE_SIMD_TYPES_SSE == 1		
+    #    include <xmmintrin.h> // SSE
+    #    include <emmintrin.h> // SSE 2
+    #    include <pmmintrin.h> // SSE 3
+    #    include <smmintrin.h> // SSE 4.1
+    #    if OGRE_DOUBLE_PRECISION == 0
+    #       define OGRE_SIMD_SSE_SINGLE 1
+    #    else
+    #      define OGRE_SIMD_SSE_DOUBLE 1
+    #    endif
+    #  endif
+    #  if OGRE_SIMD_TYPES_AVX == 1		
+    #    include <immintrin.h> // AVX
+    #    if OGRE_DOUBLE_PRECISION == 1
+    //#      define OGRE_SIMD_AVX_DOUBLE 1
+    #    endif
+    #  endif
+    #else
+      //typedef Vector4Base Vector4;
+	  //typedef Vector3Base Vector3;
+      //typedef Vector2Base Vector2;
+    #endif
 
     template<typename T> class SharedPtr;
     typedef SharedPtr<AnimableValue> AnimableValuePtr;
