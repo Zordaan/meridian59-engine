@@ -81,13 +81,13 @@ namespace Ogre
 		*/
         FORCEINLINE Vector4(const Real fX, const Real fY, const Real fZ, const Real fW)
           #if OGRE_SIMD_V4_32_SSE2
-            : simd(_mm_set_ps(fX, fY, fZ, fW)) { }
+            : simd(_mm_set_ps(fW, fZ, fY, fX)) { }
           #elif OGRE_SIMD_V4_32U_SSE2
-            { _mm_storeu_ps(vals, _mm_set_ps(fX, fY, fZ, fW)); }
+            { _mm_storeu_ps(vals, _mm_set_ps(fW, fZ, fY, fX)); }
           #elif OGRE_SIMD_V4_64_AVX
-            : simd(_mm256_set_pd(fX, fY, fZ, fW)) { }
+            : simd(_mm256_set_pd(fW, fZ, fY, fX)) { }
           #elif OGRE_SIMD_V4_64U_AVX
-            { _mm256_storeu_pd(vals, _mm256_set_pd(fX, fY, fZ, fW)); }
+            { _mm256_storeu_pd(vals, _mm256_set_pd(fW, fZ, fY, fX)); }
           #else
             : x(fX), y(fY), z(fZ), w(fW) { }
           #endif

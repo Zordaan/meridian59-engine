@@ -81,9 +81,9 @@ namespace Ogre
 
         inline Vector2(const Real fX, const Real fY )			
           #if OGRE_SIMD_V2_64_SSE2
-            : simd(_mm_set_pd(fX, fY)) { }
+            : simd(_mm_set_pd(fY, fX)) { }
           #elif OGRE_SIMD_V2_64U_SSE2
-            { _mm_storeu_pd(vals, _mm_set_pd(fX, fY)); }
+            { _mm_storeu_pd(vals, _mm_set_pd(fY, fX)); }
           #else
             : x( fX ), y( fY ) { }
           #endif
