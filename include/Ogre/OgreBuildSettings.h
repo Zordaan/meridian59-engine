@@ -91,10 +91,10 @@
 #define OGRE_SIMD_TYPES_SSE   1
 #define OGRE_SIMD_TYPES_AVX   1
 
-#define OGRE_SIMD_V4_32_SSE2  1
-#define OGRE_SIMD_V4_32_SSE41 1
-#define OGRE_SIMD_V4_64_AVX   0
-#define OGRE_SIMD_V2_64_SSE2  0
-#define OGRE_SIMD_V2_64_SSE41 0
+#define OGRE_SIMD_V4_32_SSE2  0
+#define OGRE_SIMD_V4_32_SSE41 0
+#define OGRE_SIMD_V4_64_AVX   1
+#define OGRE_SIMD_V2_64_SSE2  1
+#define OGRE_SIMD_V2_64_SSE41 1
 
 #endif
