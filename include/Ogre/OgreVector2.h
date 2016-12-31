@@ -55,7 +55,7 @@ namespace Ogre
             scaling factors can be represented by a vector, depending on how
             you interpret the values.
     */
-	OGRE_SIMD_V2_ALIGN class _OgreExport Vector2
+    OGRE_SIMD_V2_ALIGN class _OgreExport Vector2
     {
     public:
         /** Anonymous union for access to vector data.

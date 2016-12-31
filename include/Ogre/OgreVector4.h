@@ -51,11 +51,11 @@ namespace Ogre
     */
     /** 4-dimensional homogeneous vector.
     */
-	OGRE_SIMD_V4_ALIGN class _OgreExport Vector4
+    OGRE_SIMD_V4_ALIGN class _OgreExport Vector4
 	{
 	public:
-		/** Anonymous union for access to vector data.
-		*/
+        /** Anonymous union for access to vector data.
+        */
         union
         {
             struct { Real x; Real y; Real z; Real w; };
@@ -124,7 +124,7 @@ namespace Ogre
             const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
             const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
             simd = _mm256_cvtepi32_pd(b);                               // convert ints to doubles
-		  }
+          }
           #else		
             : x((Real)afCoordinate[0]), 
               y((Real)afCoordinate[1]), 
@@ -161,7 +161,7 @@ namespace Ogre
           #endif
 
         FORCEINLINE explicit Vector4(const Vector3& rhs)
-			: x(rhs.x), y(rhs.y), z(rhs.z), w(1.0f)
+            : x(rhs.x), y(rhs.y), z(rhs.z), w(1.0f)
 		{
 		}
 
@@ -187,15 +187,15 @@ namespace Ogre
 			return Vector2(x, y);
 		}
 
-		/** Exchange the contents of this vector with another.
+        /** Exchange the contents of this vector with another. 
 		*/
         FORCEINLINE void swap(Vector4& other)
 		{
           #if OGRE_SIMD_V4_32_SSE2
-			const __m128 a = simd;         // load a from this
-			const __m128 b = other.simd;   // load b from other
-			simd = b;                      // save b to this
-			other.simd = a;                // save a to other
+            const __m128 a = simd;         // load a from this
+            const __m128 b = other.simd;   // load b from other
+            simd = b;                      // save b to this
+            other.simd = a;                // save a to other
           #elif OGRE_SIMD_V4_32U_SSE2
             const __m128 a = _mm_loadu_ps(vals);       // load a from this
             const __m128 b = _mm_loadu_ps(other.vals); // load b from other
@@ -204,8 +204,8 @@ namespace Ogre
           #elif OGRE_SIMD_V4_64_AVX
             const __m256d a = simd;        // load a from this
             const __m256d b = other.simd;  // load b from other
-			simd = b;                      // save b to this
-			other.simd = a;                // save a to other
+            simd = b;                      // save b to this
+            other.simd = a;                // save a to other
           #else
 			std::swap(x, other.x);
 			std::swap(y, other.y);
@@ -213,7 +213,7 @@ namespace Ogre
 			std::swap(w, other.w);
           #endif
         }
-
+    
         FORCEINLINE Real operator [] ( const size_t i ) const
         {
             assert( i < 4 );
@@ -757,7 +757,6 @@ namespace Ogre
             o << "Vector4(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
             return o;
         }
-
         // special
         static const Vector4 ZERO;
 
@@ -768,9 +767,9 @@ namespace Ogre
       #endif
 
     };
+    /** @} */
+    /** @} */
 
-    /** @} */
-    /** @} */
 }
 #endif
 
