@@ -89,12 +89,21 @@
 /* #undef __FLASHCC__ */
 
 #define OGRE_SIMD_TYPES_SSE   1
-#define OGRE_SIMD_TYPES_AVX   1
+#define OGRE_SIMD_TYPES_AVX   0
 
+// V4 - FLOAT - ALIGNED
 #define OGRE_SIMD_V4_32_SSE2  0
 #define OGRE_SIMD_V4_32_SSE41 0
-#define OGRE_SIMD_V4_64_AVX   1
-#define OGRE_SIMD_V2_64_SSE2  1
-#define OGRE_SIMD_V2_64_SSE41 1
+
+// V4 - FLOAT - UNALIGNED
+#define OGRE_SIMD_V4_32U_SSE2  1
+#define OGRE_SIMD_V4_32U_SSE41 1
+
+
+#define OGRE_SIMD_V4_64_AVX   0
+
+// V2
+#define OGRE_SIMD_V2_64_SSE2  0
+#define OGRE_SIMD_V2_64_SSE41 0
 
 #endif
