@@ -89,21 +89,40 @@
 /* #undef __FLASHCC__ */
 
 #define OGRE_SIMD_TYPES_SSE   1
-#define OGRE_SIMD_TYPES_AVX   0
-
-// V4 - FLOAT - ALIGNED
-#define OGRE_SIMD_V4_32_SSE2  0
-#define OGRE_SIMD_V4_32_SSE41 0
-
-// V4 - FLOAT - UNALIGNED
-#define OGRE_SIMD_V4_32U_SSE2  1
-#define OGRE_SIMD_V4_32U_SSE41 1
+#define OGRE_SIMD_TYPES_AVX   1
 
 
-#define OGRE_SIMD_V4_64_AVX   0
+///    SIMD SETTINGS    ///
+#ifdef __AVX2__
+#define BLA 22
+#endif
 
-// V2
-#define OGRE_SIMD_V2_64_SSE2  0
-#define OGRE_SIMD_V2_64_SSE41 0
+#if OGRE_DOUBLE_PRECISION
+   // SELECT TO ENABLE
+#  define OGRE_SIMD_V4_64_AVX    0
+#  define OGRE_SIMD_V4_64U_AVX   0
+#  define OGRE_SIMD_V2_64_SSE2   0
+#  define OGRE_SIMD_V2_64_SSE41  0
+#  define OGRE_SIMD_V2_64U_SSE2  0
+#  define OGRE_SIMD_V2_64U_SSE41 0
+   // DISABLE 32
+#  define OGRE_SIMD_V4_32_SSE2   0
+#  define OGRE_SIMD_V4_32_SSE41  0
+#  define OGRE_SIMD_V4_32U_SSE2  0
+#  define OGRE_SIMD_V4_32U_SSE41 0
+#else
+   // SELECT TO ENABLE
+#  define OGRE_SIMD_V4_32_SSE2   0
+#  define OGRE_SIMD_V4_32_SSE41  0
+#  define OGRE_SIMD_V4_32U_SSE2  0
+#  define OGRE_SIMD_V4_32U_SSE41 0
+   // DISABLE 64
+#  define OGRE_SIMD_V4_64_AVX    0
+#  define OGRE_SIMD_V4_64U_AVX   0
+#  define OGRE_SIMD_V2_64_SSE2   0
+#  define OGRE_SIMD_V2_64_SSE41  0
+#  define OGRE_SIMD_V2_64U_SSE2  0
+#  define OGRE_SIMD_V2_64U_SSE41 0
+#endif
 
 #endif

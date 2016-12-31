@@ -39,7 +39,7 @@ namespace Ogre
     const Vector2 Vector2::NEGATIVE_UNIT_Y(  0, -1);
     const Vector2 Vector2::UNIT_SCALE(1, 1);
 
-#if OGRE_SIMD_V2_64_SSE2
+#if OGRE_SIMD_V2_64_SSE2 || OGRE_SIMD_V2_64U_SSE2
 	const __m128d Vector2::SIGNMASK_SSE64 = _mm_castsi128_pd(_mm_set1_epi64x(0x8000000000000000));
 #endif
 }

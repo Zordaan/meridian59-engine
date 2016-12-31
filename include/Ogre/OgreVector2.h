@@ -82,6 +82,8 @@ namespace Ogre
         inline Vector2(const Real fX, const Real fY )			
           #if OGRE_SIMD_V2_64_SSE2
             : simd(_mm_set_pd(fX, fY)) { }
+          #elif OGRE_SIMD_V2_64U_SSE2
+            { _mm_storeu_pd(vals, _mm_set_pd(fX, fY)); }
           #else
             : x( fX ), y( fY ) { }
           #endif
@@ -89,6 +91,8 @@ namespace Ogre
         inline explicit Vector2( const Real scalar )
           #if OGRE_SIMD_V2_64_SSE2
             : simd(_mm_set1_pd(scalar)) { }
+          #elif OGRE_SIMD_V2_64U_SSE2
+            { _mm_storeu_pd(vals, _mm_set1_pd(scalar)); }
           #else
             : x( scalar), y( scalar ) { }
           #endif
@@ -96,6 +100,8 @@ namespace Ogre
         inline explicit Vector2( const Real afCoordinate[2] )
           #if OGRE_SIMD_V2_64_SSE2
             : simd(_mm_loadu_pd(afCoordinate)) { }
+          #elif OGRE_SIMD_V2_64U_SSE2
+            { _mm_storeu_pd(vals, _mm_loadu_pd(afCoordinate)); }
           #else
             : x( afCoordinate[0] ), y( afCoordinate[1] ) { }
           #endif
@@ -106,16 +112,18 @@ namespace Ogre
         inline explicit Vector2( Real* const r )
           #if OGRE_SIMD_V2_64_SSE2
             : simd(_mm_loadu_pd(r)) { }
+          #elif OGRE_SIMD_V2_64U_SSE2
+            { _mm_storeu_pd(vals, _mm_loadu_pd(r)); }
           #else
             : x( r[0] ), y( r[1] ) { }
           #endif
 
         #if OGRE_SIMD_V2_64_SSE2
-          // SSE Constructor
+          // Aligned SSE Constructor
           FORCEINLINE Vector2(const __m128d values) : simd(values) { }
-
-          // Used to flip sign
-          static const __m128d SIGNMASK_SSE64;
+		#elif OGRE_SIMD_V2_64U_SSE2
+          // Unaligned SSE Constructor
+          FORCEINLINE Vector2(const __m128d values) { _mm_storeu_pd(vals, values); }
         #endif
 
         /** Exchange the contents of this vector with another. 
@@ -127,6 +135,11 @@ namespace Ogre
             const __m128d b = other.simd;  // load b from other
             simd = b;                      // save b to this
             other.simd = a;                // save a to other
+          #elif OGRE_SIMD_V2_64U_SSE2
+            const __m128d a = _mm_loadu_pd(vals);        // load a from this
+            const __m128d b = _mm_loadu_pd(other.vals);  // load b from other
+            _mm_storeu_pd(vals, b);                      // save b to this
+            _mm_storeu_pd(other.vals, a);                // save a to other
           #else
             std::swap(x, other.x);
             std::swap(y, other.y);
@@ -166,6 +179,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = rkVector.simd;
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_loadu_pd(rkVector.vals));
           #else
             x = rkVector.x;
             y = rkVector.y;
@@ -177,6 +192,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_set1_pd(fScalar);
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_set1_pd(fScalar));
           #else
             x = fScalar;
             y = fScalar;
@@ -199,6 +216,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_add_pd(simd, rkVector.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_add_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rkVector.vals)));
           #else
             return Vector2(
                 x + rkVector.x,
@@ -210,6 +229,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_sub_pd(simd, rkVector.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_sub_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rkVector.vals)));
           #else
             return Vector2(
                 x - rkVector.x,
@@ -221,6 +242,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_mul_pd(simd, _mm_set1_pd(fScalar)));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_mul_pd(_mm_loadu_pd(vals), _mm_set1_pd(fScalar)));
           #else
             return Vector2(
                 x * fScalar,
@@ -232,6 +255,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_mul_pd(simd, rhs.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_mul_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rhs.vals)));
           #else
             return Vector2(
                 x * rhs.x,
@@ -245,6 +270,8 @@ namespace Ogre
  
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_div_pd(simd, _mm_set1_pd(fScalar)));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_div_pd(_mm_loadu_pd(vals), _mm_set1_pd(fScalar)));
           #else
             const Real fInv = 1.0f / fScalar;
 
@@ -258,6 +285,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_div_pd(simd, rhs.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_div_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rhs.vals)));
           #else
             return Vector2(
                 x / rhs.x,
@@ -274,6 +303,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_xor_pd(simd, SIGNMASK_SSE64));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_xor_pd(_mm_loadu_pd(vals), SIGNMASK_SSE64));
           #else
             return Vector2(-x, -y);
           #endif
@@ -284,6 +315,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_mul_pd(_mm_set1_pd(fScalar), rkVector.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_mul_pd(_mm_set1_pd(fScalar), _mm_loadu_pd(rkVector.vals)));
           #else
             return Vector2(
                 fScalar * rkVector.x,
@@ -295,6 +328,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_div_pd(_mm_set1_pd(fScalar), rkVector.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_div_pd(_mm_set1_pd(fScalar), _mm_loadu_pd(rkVector.vals)));
           #else
             return Vector2(
                 fScalar / rkVector.x,
@@ -306,6 +341,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_add_pd(lhs.simd, _mm_set1_pd(rhs)));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_add_pd(_mm_loadu_pd(lhs.vals), _mm_set1_pd(rhs)));
           #else
             return Vector2(
                 lhs.x + rhs,
@@ -317,6 +354,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_add_pd(_mm_set1_pd(lhs), rhs.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_add_pd(_mm_set1_pd(lhs), _mm_loadu_pd(rhs.vals)));
           #else
             return Vector2(
                 lhs + rhs.x,
@@ -328,6 +367,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_sub_pd(lhs.simd, _mm_set1_pd(rhs)));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_sub_pd(_mm_loadu_pd(lhs.vals), _mm_set1_pd(rhs)));
           #else
             return Vector2(
                 lhs.x - rhs,
@@ -339,6 +380,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             return Vector2(_mm_sub_pd(_mm_set1_pd(lhs), rhs.simd));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            return Vector2(_mm_sub_pd(_mm_set1_pd(lhs), _mm_loadu_pd(rhs.vals)));
           #else
             return Vector2(
                 lhs - rhs.x,
@@ -351,6 +394,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_add_pd(simd, rkVector.simd);
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_add_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rkVector.vals)));
           #else
             x += rkVector.x;
             y += rkVector.y;
@@ -362,6 +407,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_add_pd(simd, _mm_set1_pd(fScaler));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_add_pd(_mm_loadu_pd(vals), _mm_set1_pd(fScaler)));
           #else
             x += fScaler;
             y += fScaler;
@@ -373,6 +420,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_sub_pd(simd, rkVector.simd);
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_sub_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rkVector.vals)));
           #else
             x -= rkVector.x;
             y -= rkVector.y;
@@ -384,6 +433,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_sub_pd(simd, _mm_set1_pd(fScaler));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_sub_pd(_mm_loadu_pd(vals), _mm_set1_pd(fScaler)));
           #else
             x -= fScaler;
             y -= fScaler;
@@ -395,6 +446,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_mul_pd(simd, _mm_set1_pd(fScalar));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_mul_pd(_mm_loadu_pd(vals), _mm_set1_pd(fScalar)));
           #else
             x *= fScalar;
             y *= fScalar;
@@ -406,6 +459,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_mul_pd(simd, rkVector.simd);
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_mul_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rkVector.vals)));
           #else
             x *= rkVector.x;
             y *= rkVector.y;
@@ -419,6 +474,8 @@ namespace Ogre
 
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_div_pd(simd, _mm_set1_pd(fScalar));
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_div_pd(_mm_loadu_pd(vals), _mm_set1_pd(fScalar)));
           #else
             const Real fInv = 1.0f / fScalar;
 
@@ -432,6 +489,8 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             simd = _mm_div_pd(simd, rkVector.simd);
+          #elif OGRE_SIMD_V2_64U_SSE2
+            _mm_storeu_pd(vals, _mm_div_pd(_mm_loadu_pd(vals), _mm_loadu_pd(rkVector.vals)));
           #else
 			x /= rkVector.x;
             y /= rkVector.y;
@@ -450,6 +509,11 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE41
             const __m128d b = _mm_dp_pd(simd, simd, 0xFF);
+            const __m128d c = _mm_sqrt_sd(b, b);
+            return c.m128d_f64[0];
+          #elif OGRE_SIMD_V2_64U_SSE41
+            const __m128d a = _mm_loadu_pd(vals);
+            const __m128d b = _mm_dp_pd(a, a, 0xFF);
             const __m128d c = _mm_sqrt_sd(b, b);
             return c.m128d_f64[0];
           #else
@@ -472,6 +536,10 @@ namespace Ogre
           #if OGRE_SIMD_V2_64_SSE41
             const __m128d b = _mm_dp_pd(simd, simd, 0xFF);
             return b.m128d_f64[0];
+          #elif OGRE_SIMD_V2_64U_SSE41
+            const __m128d a = _mm_loadu_pd(vals);
+            const __m128d b = _mm_dp_pd(a, a, 0xFF);
+            return b.m128d_f64[0];
           #else
             return x * x + y * y;
           #endif
@@ -488,6 +556,13 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE41
             const __m128d c = _mm_sub_pd(simd, rhs.simd);
+            const __m128d d = _mm_dp_pd(c, c, 0xFF);
+            const __m128d e = _mm_sqrt_sd(d, d);
+            return e.m128d_f64[0];
+          #elif OGRE_SIMD_V2_64U_SSE41
+            const __m128d a = _mm_loadu_pd(vals);
+            const __m128d b = _mm_loadu_pd(rhs.vals);
+            const __m128d c = _mm_sub_pd(a, b);
             const __m128d d = _mm_dp_pd(c, c, 0xFF);
             const __m128d e = _mm_sqrt_sd(d, d);
             return e.m128d_f64[0];
@@ -510,6 +585,12 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE41
             const __m128d c = _mm_sub_pd(simd, rhs.simd);
+            const __m128d d = _mm_dp_pd(c, c, 0xFF);
+            return d.m128d_f64[0];
+          #elif OGRE_SIMD_V2_64U_SSE41
+            const __m128d a = _mm_loadu_pd(vals);
+            const __m128d b = _mm_loadu_pd(rhs.vals);
+            const __m128d c = _mm_sub_pd(a, b);
             const __m128d d = _mm_dp_pd(c, c, 0xFF);
             return d.m128d_f64[0];
           #else
@@ -535,6 +616,10 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE41
             return _mm_dp_pd(simd, vec.simd, 0xFF).m128d_f64[0];
+          #elif OGRE_SIMD_V2_64U_SSE41
+            const __m128d a = _mm_loadu_pd(vals);
+            const __m128d b = _mm_loadu_pd(vec.vals);
+            return _mm_dp_pd(a, b, 0xFF).m128d_f64[0];
           #else
             return x * vec.x + y * vec.y;
           #endif
@@ -574,6 +659,10 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE2
             const __m128d a = _mm_add_pd(simd, vec.simd);
+            const __m128d b = _mm_mul_pd(a, _mm_set1_pd(0.5));
+            return Vector2(b);
+          #elif OGRE_SIMD_V2_64U_SSE2
+            const __m128d a = _mm_add_pd(_mm_loadu_pd(vals), _mm_loadu_pd(vec.vals));
             const __m128d b = _mm_mul_pd(a, _mm_set1_pd(0.5));
             return Vector2(b);
           #else
@@ -740,6 +829,11 @@ namespace Ogre
         static const Vector2 NEGATIVE_UNIT_X;
         static const Vector2 NEGATIVE_UNIT_Y;
         static const Vector2 UNIT_SCALE;
+
+        #if OGRE_SIMD_V2_64_SSE2 || OGRE_SIMD_V2_64U_SSE2
+          // Used to flip sign
+          static const __m128d SIGNMASK_SSE64;
+        #endif
 
         /** Function for writing to a stream.
         */
