@@ -480,17 +480,13 @@ namespace Ogre
         FORCEINLINE Vector4 operator - () const
         {
           #if OGRE_SIMD_V4_32_SSE2
-            return Vector4(_mm_xor_ps(simd, SIGNMASK_SSE));
+            return Vector4(_mm_sub_ps(_mm_setzero_ps(), simd));
           #elif OGRE_SIMD_V4_32U_SSE2
-            const __m128 a = _mm_loadu_ps(vals);          // load values
-            const __m128 b = _mm_xor_ps(a, SIGNMASK_SSE); // flip sign bit
-            return Vector4(b);
+            return Vector4(_mm_sub_ps(_mm_setzero_ps(), _mm_loadu_ps(vals)));
           #elif OGRE_SIMD_V4_64_AVX
-            return Vector4(_mm256_xor_pd(simd, SIGNMASK_AVX));
+            return Vector4(_mm256_sub_pd(_mm_setzero_pd(), simd));
           #elif OGRE_SIMD_V4_64U_AVX
-            const __m256d a = _mm256_loadu_pd(vals);          // load values
-            const __m256d b = _mm256_xor_pd(a, SIGNMASK_AVX); // flip sign bit
-            return Vector4(b);
+            return Vector4(_mm256_sub_pd(_mm_setzero_pd(), _mm256_loadu_pd(vals)));
           #else
             return Vector4(-x, -y, -z, -w);
           #endif
@@ -816,12 +812,6 @@ namespace Ogre
         }
         // special
         static const Vector4 ZERO;
-
-      #if OGRE_SIMD_V4_32_SSE2 || OGRE_SIMD_V4_32U_SSE2
-		static const __m128 SIGNMASK_SSE;
-      #elif OGRE_SIMD_V4_64_AVX || OGRE_SIMD_V4_64U_AVX
-		static const __m256d SIGNMASK_AVX;
-      #endif
 
     };
     /** @} */
