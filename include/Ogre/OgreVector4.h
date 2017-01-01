@@ -112,28 +112,19 @@ namespace Ogre
         FORCEINLINE explicit Vector4(const int afCoordinate[4])
           #if OGRE_SIMD_V4_32_SSE2
           {
-			// todo ?
-            const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
-            const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
-            simd = _mm_cvtepi32_ps(b);                                  // convert ints to floats
+            simd = _mm_cvtepi32_ps(_mm_loadu_si128((__m128i*)afCoordinate));
           }
           #elif OGRE_SIMD_V4_32U_SSE2
           {
-            const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
-            const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
-            _mm_storeu_ps(vals, _mm_cvtepi32_ps(b));                    // convert ints to floats
+            _mm_storeu_ps(vals, _mm_cvtepi32_ps(_mm_loadu_si128((__m128i*)afCoordinate)));
           }
           #elif OGRE_SIMD_V4_64_AVX
           {
-            const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
-            const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
-            simd = _mm256_cvtepi32_pd(b);                               // convert ints to doubles
+            simd = _mm256_cvtepi32_pd(_mm_loadu_si128((__m128i*)afCoordinate));
           }
           #elif OGRE_SIMD_V4_64U_AVX
           {
-            const __m128i a = _mm_set1_epi32(0xFFFFFFFF);               // set mask to load all 4 ints
-            const __m128i b = _mm_maskload_epi32(&afCoordinate[0], a);  // load the 4 ints
-            _mm256_storeu_pd(vals, _mm256_cvtepi32_pd(b));              // convert ints to doubles
+            _mm256_storeu_pd(vals, _mm256_cvtepi32_pd(_mm_loadu_si128((__m128i*)afCoordinate)));
           }
           #else		
             : x((Real)afCoordinate[0]), 

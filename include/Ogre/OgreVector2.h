@@ -107,7 +107,13 @@ namespace Ogre
           #endif
 
         inline explicit Vector2( const int afCoordinate[2] )
+        #if OGRE_SIMD_V2_64_SSE2
+            : simd(_mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)afCoordinate))) { }
+        #elif OGRE_SIMD_V2_64U_SSE2
+            { _mm_storeu_pd(vals, _mm_cvtepi32_pd(_mm_loadl_epi64((__m128i*)afCoordinate))); }
+        #else
             : x((Real)afCoordinate[0]), y((Real)afCoordinate[1]) { }
+        #endif
 
         inline explicit Vector2( Real* const r )
           #if OGRE_SIMD_V2_64_SSE2

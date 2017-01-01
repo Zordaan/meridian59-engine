@@ -93,9 +93,6 @@
 
 
 ///    SIMD SETTINGS    ///
-#ifdef __AVX2__
-#define BLA 22
-#endif
 
 #if OGRE_DOUBLE_PRECISION
    // SELECT TO ENABLE
@@ -112,8 +109,8 @@
 #  define OGRE_SIMD_V4_32U_SSE41 0
 #else
    // SELECT TO ENABLE
-#  define OGRE_SIMD_V4_32_SSE2   0
-#  define OGRE_SIMD_V4_32_SSE41  0
+#  define OGRE_SIMD_V4_32_SSE2   1
+#  define OGRE_SIMD_V4_32_SSE41  1
 #  define OGRE_SIMD_V4_32U_SSE2  0
 #  define OGRE_SIMD_V4_32U_SSE41 0
    // DISABLE 64
