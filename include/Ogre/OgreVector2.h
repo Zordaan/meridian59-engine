@@ -148,10 +148,10 @@ namespace Ogre
         inline void swap(Vector2& other)
         {
           #if OGRE_SIMD_V2_32_SSE2
-            const __m128i a = _mm_loadl_epi64((__m128i*)vals);       // load a from this
-            const __m128i b = _mm_loadl_epi64((__m128i*)other.vals); // load b from other
-            _mm_storel_epi64((__m128i*)vals, b);                     // save b to this
-            _mm_storel_epi64((__m128i*)other.vals, a);               // save a to other
+            const __m128i a = _mm_loadl_epi64((__m128i*)vals);                       // load this to low 64bits
+            const __m128  b = _mm_loadh_pi(_mm_castsi128_ps(a), (__m64*)other.vals); // load other to high 64bits		
+            _mm_storel_epi64((__m128i*)other.vals, _mm_castps_si128(b));             // save low 64bits to other
+            _mm_storeh_pi((__m64*)vals, b);                                          // save high 64bits to this		
           #elif OGRE_SIMD_V2_64_SSE2
             const __m128d a = simd;        // load a from this
             const __m128d b = other.simd;  // load b from other
@@ -611,13 +611,18 @@ namespace Ogre
         */
         inline Real length () const
         {
-          #if OGRE_SIMD_V2_64_SSE41
-            const __m128d b = _mm_dp_pd(simd, simd, 0xFF);
+          #if OGRE_SIMD_V2_32_SSE41
+            const __m128 a = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)vals));
+            const __m128 b = _mm_dp_ps(a, a, 0x31);
+            const __m128 c = _mm_sqrt_ss(b);
+            return c.m128_f32[0];
+          #elif OGRE_SIMD_V2_64_SSE41
+            const __m128d b = _mm_dp_pd(simd, simd, 0x31);
             const __m128d c = _mm_sqrt_sd(b, b);
             return c.m128d_f64[0];
           #elif OGRE_SIMD_V2_64U_SSE41
             const __m128d a = _mm_loadu_pd(vals);
-            const __m128d b = _mm_dp_pd(a, a, 0xFF);
+            const __m128d b = _mm_dp_pd(a, a, 0x31);
             const __m128d c = _mm_sqrt_sd(b, b);
             return c.m128d_f64[0];
           #else
@@ -638,11 +643,11 @@ namespace Ogre
         inline Real squaredLength () const
         {
           #if OGRE_SIMD_V2_64_SSE41
-            const __m128d b = _mm_dp_pd(simd, simd, 0xFF);
+            const __m128d b = _mm_dp_pd(simd, simd, 0x31);
             return b.m128d_f64[0];
           #elif OGRE_SIMD_V2_64U_SSE41
             const __m128d a = _mm_loadu_pd(vals);
-            const __m128d b = _mm_dp_pd(a, a, 0xFF);
+            const __m128d b = _mm_dp_pd(a, a, 0x31);
             return b.m128d_f64[0];
           #else
             return x * x + y * y;
@@ -660,14 +665,14 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE41
             const __m128d c = _mm_sub_pd(simd, rhs.simd);
-            const __m128d d = _mm_dp_pd(c, c, 0xFF);
+            const __m128d d = _mm_dp_pd(c, c, 0x31);
             const __m128d e = _mm_sqrt_sd(d, d);
             return e.m128d_f64[0];
           #elif OGRE_SIMD_V2_64U_SSE41
             const __m128d a = _mm_loadu_pd(vals);
             const __m128d b = _mm_loadu_pd(rhs.vals);
             const __m128d c = _mm_sub_pd(a, b);
-            const __m128d d = _mm_dp_pd(c, c, 0xFF);
+            const __m128d d = _mm_dp_pd(c, c, 0x31);
             const __m128d e = _mm_sqrt_sd(d, d);
             return e.m128d_f64[0];
           #else
@@ -689,13 +694,13 @@ namespace Ogre
         {
           #if OGRE_SIMD_V2_64_SSE41
             const __m128d c = _mm_sub_pd(simd, rhs.simd);
-            const __m128d d = _mm_dp_pd(c, c, 0xFF);
+            const __m128d d = _mm_dp_pd(c, c, 0x31);
             return d.m128d_f64[0];
           #elif OGRE_SIMD_V2_64U_SSE41
             const __m128d a = _mm_loadu_pd(vals);
             const __m128d b = _mm_loadu_pd(rhs.vals);
             const __m128d c = _mm_sub_pd(a, b);
-            const __m128d d = _mm_dp_pd(c, c, 0xFF);
+            const __m128d d = _mm_dp_pd(c, c, 0x31);
             return d.m128d_f64[0];
           #else
             return (*this - rhs).squaredLength();
@@ -719,11 +724,11 @@ namespace Ogre
         inline Real dotProduct(const Vector2& vec) const
         {
           #if OGRE_SIMD_V2_64_SSE41
-            return _mm_dp_pd(simd, vec.simd, 0xFF).m128d_f64[0];
+            return _mm_dp_pd(simd, vec.simd, 0x31).m128d_f64[0];
           #elif OGRE_SIMD_V2_64U_SSE41
             const __m128d a = _mm_loadu_pd(vals);
             const __m128d b = _mm_loadu_pd(vec.vals);
-            return _mm_dp_pd(a, b, 0xFF).m128d_f64[0];
+            return _mm_dp_pd(a, b, 0x31).m128d_f64[0];
           #else
             return x * vec.x + y * vec.y;
           #endif

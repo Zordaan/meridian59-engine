@@ -97,8 +97,8 @@
    // SELECT TO ENABLE
 #  define OGRE_SIMD_V4_64_AVX    0
 #  define OGRE_SIMD_V4_64U_AVX   0
-#  define OGRE_SIMD_V2_64_SSE2   0
-#  define OGRE_SIMD_V2_64_SSE41  0
+#  define OGRE_SIMD_V2_64_SSE2   1
+#  define OGRE_SIMD_V2_64_SSE41  1
 #  define OGRE_SIMD_V2_64U_SSE2  0
 #  define OGRE_SIMD_V2_64U_SSE41 0
 

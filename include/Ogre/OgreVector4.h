@@ -772,9 +772,9 @@ namespace Ogre
         FORCEINLINE Real dotProduct(const Vector4& vec) const
         {
           #if OGRE_SIMD_V4_32_SSE41
-            return _mm_dp_ps(simd, vec.simd, 0xFF).m128_f32[0];
+            return _mm_dp_ps(simd, vec.simd, 0xF1).m128_f32[0];
           #elif OGRE_SIMD_V4_32U_SSE41
-            return _mm_dp_ps(_mm_loadu_ps(vals), _mm_loadu_ps(vec.vals), 0xFF).m128_f32[0];
+            return _mm_dp_ps(_mm_loadu_ps(vals), _mm_loadu_ps(vec.vals), 0xF1).m128_f32[0];
           #else
             return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
           #endif
